@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head><title>Supervisor Panel</title></head>
+<body>
+  <h1>Pending Help Requests</h1>
+  <div id="requests"></div>
+
+  <script>
+    async function loadRequests() {
+      const res = await fetch('http://127.0.0.1:8000/help');
+      const data = await res.json();
+      document.getElementById('requests').innerHTML = data.map(req => `
+        <div>
+          <b>Q:</b> ${req[1]} <br/>
+          <input id="ans-${req[0]}" placeholder="Type answer"/>
+          <button onclick="resolve('${req[0]}')">Resolve</button>
+        </div>
+      `).join('');
+    }
+
+    async function resolve(id) {
+      const answer = document.getElementById(`ans-${id}`).value;
+      await fetch(`http://127.0.0.1:8000/resolve/${id}?answer=${encodeURIComponent(answer)}`, { method: 'POST' });
+      alert('Resolved');
+      loadRequests();
+    }
+
+    loadRequests();
+  </script>
+</body>
+</html>
